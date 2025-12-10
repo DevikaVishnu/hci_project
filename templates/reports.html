@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - ERP-Vision{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2 class="section-title">Business Reports</h2>
+</div>
+
+<div class="report-cards">
+    <!-- Sales Report -->
+    <a href="{{ url_for('sales_report') }}" class="report-card">
+        <div class="report-card-icon blue">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div>
+            <h3 class="report-card-title">Sales Report</h3>
+            <p class="report-card-description">View sales performance, order history, and revenue analysis with date filters.</p>
+        </div>
+        <span class="btn btn-sm btn-secondary">
+            View Report <i class="fas fa-arrow-right"></i>
+        </span>
+    </a>
+    
+    <!-- Inventory Report -->
+    <a href="{{ url_for('inventory_report') }}" class="report-card">
+        <div class="report-card-icon orange">
+            <i class="fas fa-boxes"></i>
+        </div>
+        <div>
+            <h3 class="report-card-title">Inventory Report</h3>
+            <p class="report-card-description">Check stock levels, identify low stock items, and view inventory valuation.</p>
+        </div>
+        <span class="btn btn-sm btn-secondary">
+            View Report <i class="fas fa-arrow-right"></i>
+        </span>
+    </a>
+    
+    <!-- Financial Report -->
+    <a href="{{ url_for('financial_report') }}" class="report-card">
+        <div class="report-card-icon green">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div>
+            <h3 class="report-card-title">Financial Report</h3>
+            <p class="report-card-description">Income vs expenses breakdown by category with profit/loss summary.</p>
+        </div>
+        <span class="btn btn-sm btn-secondary">
+            View Report <i class="fas fa-arrow-right"></i>
+        </span>
+    </a>
+</div>
+{% endblock %}

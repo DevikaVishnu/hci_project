@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Visio{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .chart-container { position: relative; height: 280px; }
+    .chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+    .chart-row-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+    .gradient-card { position: relative; overflow: hidden; }
+    .gradient-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .gradient-card.blue::before { background: linear-gradient(90deg, #0066FF, #00D4FF); }
+    .gradient-card.green::before { background: linear-gradient(90deg, #10B981, #34D399); }
+    .gradient-card.purple::before { background: linear-gradient(90deg, #6366F1, #A855F7); }
+    .gradient-card.orange::before { background: linear-gradient(90deg, #F59E0B, #FB923C); }
+    .gradient-card.pink::before { background: linear-gradient(90deg, #EC4899, #F472B6); }
+    .gradient-card.cyan::before { background: linear-gradient(90deg, #06B6D4, #22D3EE); }
+    .gradient-card.red::before { background: linear-gradient(90deg, #EF4444, #F87171); }
+    .gradient-card.indigo::before { background: linear-gradient(90deg, #4F46E5, #818CF8); }
+    .stat-card-enhanced { background: linear-gradient(135deg, var(--bg-card) 0%, rgba(30, 41, 59, 0.8) 100%); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
+    .stat-card-enhanced:hover { border-color: rgba(255, 255, 255, 0.2); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
+    .stat-icon-large { width: 56px; height: 56px; border-radius: 16px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
+    .progress-bar-container { height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden; margin-top: 0.75rem; }
+    .progress-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .chart-icon { margin-right: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Enhanced Stats Cards -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 2rem;">
+    <div class="stat-card stat-card-enhanced gradient-card blue">
+        <div class="stat-header">
+            <div class="stat-icon-large blue"><i class="fas fa-shopping-cart"></i></div>
+            <div class="stat-trend up"><i class="fas fa-arrow-up"></i><span>12%</span></div>
+        </div>
+        <div class="stat-value">{{ stats.total_orders }}</div>
+        <div class="stat-label">Total Orders</div>
+        <div class="progress-bar-container"><div class="progress-bar" style="width: 75%; background: linear-gradient(90deg, #0066FF, #00D4FF);"></div></div>
+    </div>
+    <div class="stat-card stat-card-enhanced gradient-card green">
+        <div class="stat-header">
+            <div class="stat-icon-large green"><i class="fas fa-dollar-sign"></i></div>
+            <div class="stat-trend up"><i class="fas fa-arrow-up"></i><span>8%</span></div>
+        </div>
+        <div class="stat-value">${{ "%.0f"|format(stats.total_revenue) }}</div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="progress-bar-container"><div class="progress-bar" style="width: 85%; background: linear-gradient(90deg, #10B981, #34D399);"></div></div>
+    </div>
+    <div class="stat-card stat-card-enhanced gradient-card purple">
+        <div class="stat-header">
+            <div class="stat-icon-large purple"><i class="fas fa-users"></i></div>
+        </div>
+        <div class="stat-value">{{ stats.total_customers }}</div>
+        <div class="stat-label">Customers</div>
+        <div class="progress-bar-container"><div class="progress-bar" style="width: 60%; background: linear-gradient(90deg, #6366F1, #A855F7);"></div></div>
+    </div>
+    <div class="stat-card stat-card-enhanced gradient-card orange">
+        <div class="stat-header">
+            <div class="stat-icon-large orange"><i class="fas fa-box"></i></div>
+            {% if stats.low_stock_count > 0 %}<div class="stat-trend down"><i class="fas fa-exclamation"></i><span>{{ stats.low_stock_count }} low</span></div>{% endif %}
+        </div>
+        <div class="stat-value">{{ stats.total_products }}</div>
+        <div class="stat-label">Products</div>
+        <div class="progress-bar-container"><div class="progress-bar" style="width: 70%; background: linear-gradient(90deg, #F59E0B, #FB923C);"></div></div>
+    </div>
+    <div class="stat-card stat-card-enhanced gradient-card cyan">
+        <div class="stat-header">
+            <div class="stat-icon-large" style="background: rgba(6, 182, 212, 0.15); color: #06B6D4;"><i class="fas fa-id-badge"></i></div>
+        </div>
+        <div class="stat-value">{{ stats.total_employees }}</div>
+        <div class="stat-label">Employees</div>
+        <div class="progress-bar-container"><div class="progress-bar" style="width: 50%; background: linear-gradient(90deg, #06B6D4, #22D3EE);"></div></div>
+    </div>
+    <div class="stat-card stat-card-enhanced gradient-card {% if stats.net_profit >= 0 %}green{% else %}red{% endif %}">
+        <div class="stat-header">
+            <div class="stat-icon-large {% if stats.net_profit >= 0 %}green{% else %}red{% endif %}"><i class="fas fa-chart-line"></i></div>
+        </div>
+        <div class="stat-value {% if stats.net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">${{ "%.0f"|format(stats.net_profit) }}</div>
+        <div class="stat-label">Net Profit</div>
+        <div class="progress-bar-container"><div class="progress-bar" style="width: {% if stats.net_profit >= 0 %}80{% else %}30{% endif %}%; background: linear-gradient(90deg, #10B981, #34D399);"></div></div>
+    </div>
+</div>
+
+<!-- Row 1: Order Status & Revenue by Category -->
+<div class="chart-row">
+    <div class="card gradient-card purple">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie chart-icon" style="color: #6366F1;"></i>Order Status Distribution</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="orderStatusChart"></canvas></div></div>
+    </div>
+    <div class="card gradient-card green">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-tags chart-icon" style="color: #10B981;"></i>Revenue by Category</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="revenueByCategoryChart"></canvas></div></div>
+    </div>
+</div>
+
+<!-- Row 2: Income vs Expense -->
+<div class="chart-row">
+    <div class="card gradient-card orange">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-balance-scale chart-icon" style="color: #F59E0B;"></i>Income vs Expenses (7 Days)</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="incomeExpenseChart"></canvas></div></div>
+    </div>
+</div>
+
+<!-- Row 3: Monthly Revenue, Expense Breakdown, Team by Dept -->
+<div class="chart-row-3">
+    <div class="card gradient-card cyan">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-alt chart-icon" style="color: #06B6D4;"></i>Monthly Revenue Trend</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="monthlyRevenueChart"></canvas></div></div>
+    </div>
+    <div class="card gradient-card pink">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-receipt chart-icon" style="color: #EC4899;"></i>Expense Breakdown</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="expenseChart"></canvas></div></div>
+    </div>
+    <div class="card gradient-card indigo">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-building chart-icon" style="color: #6366F1;"></i>Team by Department</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="employeeChart"></canvas></div></div>
+    </div>
+</div>
+
+<!-- Row 4: Top Products & Customer Growth -->
+<div class="chart-row">
+    <div class="card gradient-card green">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-trophy chart-icon" style="color: #10B981;"></i>Top Selling Products</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="topProductsChart"></canvas></div></div>
+    </div>
+    <div class="card gradient-card red">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-fire chart-icon" style="color: #EF4444;"></i>Revenue vs Cost Analysis</h3></div>
+        <div class="card-body"><div class="chart-container"><canvas id="revenueCostChart"></canvas></div></div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="section-header"><h2 class="section-title">Quick Actions</h2></div>
+<div class="quick-actions mb-4">
+    <a href="{{ url_for('add_order') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #0066FF, #00D4FF);"><i class="fas fa-plus"></i> New Order</a>
+    <a href="{{ url_for('add_customer') }}" class="btn btn-secondary" style="border-color: #6366F1; color: #A855F7;"><i class="fas fa-user-plus"></i> Add Customer</a>
+    <a href="{{ url_for('add_product') }}" class="btn btn-secondary" style="border-color: #10B981; color: #34D399;"><i class="fas fa-box"></i> Add Product</a>
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-secondary" style="border-color: #F59E0B; color: #FB923C;"><i class="fas fa-exchange-alt"></i> Record Transaction</a>
+</div>
+
+<!-- Recent Orders & Low Stock -->
+<div class="chart-row">
+    <div class="card gradient-card blue">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-clock chart-icon" style="color: #0066FF;"></i>Recent Orders</h3>
+            <a href="{{ url_for('orders') }}" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if recent_orders %}
+            <table class="data-table">
+                <thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td class="font-mono">{{ order.order_number }}</td>
+                        <td>{{ order.customer.name }}</td>
+                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                        <td><span class="badge badge-{{ order.status }}">{{ order.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state"><i class="fas fa-shopping-cart"></i><h3>No orders yet</h3><p>Create your first order to get started.</p></div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card gradient-card orange">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-exclamation-triangle chart-icon" style="color: #F59E0B;"></i>Low Stock Alerts</h3>
+            <a href="{{ url_for('products') }}" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if low_stock_products %}
+            <table class="data-table">
+                <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Min</th></tr></thead>
+                <tbody>
+                    {% for product in low_stock_products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td class="font-mono">{{ product.sku }}</td>
+                        <td><span class="badge badge-low-stock">{{ product.stock_quantity }}</span></td>
+                        <td>{{ product.min_stock_level }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state"><i class="fas fa-check-circle" style="color: #10B981;"></i><h3>All stock levels OK</h3><p>No products below minimum levels.</p></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const salesData = {{ sales_data | tojson }};
+const orderStatusData = {{ order_status_data | tojson }};
+const revenueByCategoryData = {{ revenue_by_category | tojson }};
+const monthlyRevenueData = {{ monthly_revenue | tojson }};
+const expenseByCategoryData = {{ expense_by_category | tojson }};
+const employeeByDeptData = {{ employee_by_dept | tojson }};
+const incomeVsExpenseData = {{ income_vs_expense | tojson }};
+const topProductsData = {{ top_products | tojson }};
+
+Chart.defaults.color = '#94A3B8';
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Order Status - Doughnut
+    new Chart(document.getElementById('orderStatusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: orderStatusData.map(d => d.status),
+            datasets: [{ data: orderStatusData.map(d => d.count), backgroundColor: ['#F59E0B', '#0066FF', '#6366F1', '#10B981', '#EF4444'], borderWidth: 0, hoverOffset: 10 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } } } }
+    });
+
+    // 3. Revenue by Category - Polar Area
+    new Chart(document.getElementById('revenueByCategoryChart'), {
+        type: 'polarArea',
+        data: {
+            labels: revenueByCategoryData.map(d => d.category),
+            datasets: [{ data: revenueByCategoryData.map(d => d.revenue), backgroundColor: ['#0066FF80', '#10B98180', '#F59E0B80', '#6366F180', '#EC489980', '#06B6D480'], borderColor: ['#0066FF', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#06B6D4'], borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 10, usePointStyle: true } } }, scales: { r: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { display: false } } } }
+    });
+
+    // 4. Income vs Expense - Grouped Bar
+    new Chart(document.getElementById('incomeExpenseChart'), {
+        type: 'bar',
+        data: {
+            labels: incomeVsExpenseData.map(d => d.date),
+            datasets: [
+                { label: 'Income', data: incomeVsExpenseData.map(d => d.income), backgroundColor: 'rgba(16, 185, 129, 0.8)', borderColor: '#10B981', borderWidth: 1, borderRadius: 6 },
+                { label: 'Expense', data: incomeVsExpenseData.map(d => d.expense), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: '#EF4444', borderWidth: 1, borderRadius: 6 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { padding: 15, usePointStyle: true } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: v => '$' + v } } } }
+    });
+
+    // 5. Monthly Revenue - Gradient Bar
+    const monthlyCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+    const monthlyGradient = monthlyCtx.createLinearGradient(0, 0, 0, 280);
+    monthlyGradient.addColorStop(0, '#06B6D4');
+    monthlyGradient.addColorStop(1, '#0891B2');
+    new Chart(monthlyCtx, {
+        type: 'bar',
+        data: { labels: monthlyRevenueData.map(d => d.month), datasets: [{ label: 'Revenue', data: monthlyRevenueData.map(d => d.revenue), backgroundColor: monthlyGradient, borderRadius: 8, borderSkipped: false }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: v => '$' + v } } } }
+    });
+
+    // 6. Expense Breakdown - Doughnut
+    new Chart(document.getElementById('expenseChart'), {
+        type: 'doughnut',
+        data: {
+            labels: expenseByCategoryData.map(d => d.category),
+            datasets: [{ data: expenseByCategoryData.map(d => d.amount), backgroundColor: ['#EC4899', '#F472B6', '#F9A8D4', '#FBCFE8', '#FCE7F3', '#FDF2F8', '#DB2777'], borderWidth: 0, hoverOffset: 10 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { padding: 10, usePointStyle: true, font: { size: 11 } } } } }
+    });
+
+    // 7. Employees by Department - Horizontal Bar
+    new Chart(document.getElementById('employeeChart'), {
+        type: 'bar',
+        data: {
+            labels: employeeByDeptData.map(d => d.department),
+            datasets: [{ label: 'Employees', data: employeeByDeptData.map(d => d.count), backgroundColor: ['#6366F1', '#8B5CF6', '#A855F7', '#C084FC', '#D8B4FE', '#E9D5FF'], borderRadius: 6, borderSkipped: false }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
+    });
+
+    // 8. Top Products - Horizontal Bar
+    new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+            labels: topProductsData.map(d => d.name),
+            datasets: [{ label: 'Units Sold', data: topProductsData.map(d => d.sold), backgroundColor: ['#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5'], borderRadius: 6, borderSkipped: false }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } }, y: { grid: { display: false } } } }
+    });
+
+    // 9. Revenue vs Cost - Line Chart
+    const revCostCtx = document.getElementById('revenueCostChart').getContext('2d');
+    const revGradient = revCostCtx.createLinearGradient(0, 0, 0, 280);
+    revGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+    revGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+    const costGradient = revCostCtx.createLinearGradient(0, 0, 0, 280);
+    costGradient.addColorStop(0, 'rgba(239, 68, 68, 0.3)');
+    costGradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+    new Chart(revCostCtx, {
+        type: 'line',
+        data: {
+            labels: incomeVsExpenseData.map(d => d.date),
+            datasets: [
+                { label: 'Revenue', data: incomeVsExpenseData.map(d => d.income), borderColor: '#10B981', backgroundColor: revGradient, fill: true, tension: 0.4, pointRadius: 4 },
+                { label: 'Costs', data: incomeVsExpenseData.map(d => d.expense), borderColor: '#EF4444', backgroundColor: costGradient, fill: true, tension: 0.4, pointRadius: 4 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { usePointStyle: true } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: v => '$' + v } } } }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}New Order - ERP-Vision{% endblock %}
+{% block page_title %}Create New Order{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 900px;">
+    <div class="card-header">
+        <h3 class="card-title">Order Details</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('add_order') }}" method="POST" data-validate>
+            <div class="form-group">
+                <label class="form-label">Customer *</label>
+                <select name="customer_id" class="form-control" required>
+                    <option value="">Select Customer</option>
+                    {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.name }} ({{ customer.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Order Items</label>
+                <div id="order-items">
+                    <!-- Order items will be added here -->
+                </div>
+                <button type="button" class="btn btn-secondary mt-2" onclick="addOrderItem()">
+                    <i class="fas fa-plus"></i>
+                    Add Item
+                </button>
+            </div>
+            
+            <div class="card" style="background: var(--bg-tertiary); margin-top: 1.5rem;">
+                <div class="card-body">
+                    <div class="d-flex justify-between align-center">
+                        <span class="text-secondary">Order Total:</span>
+                        <span style="font-size: 1.5rem; font-weight: 700;" id="order-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i>
+                    Create Order
+                </button>
+                <a href="{{ url_for('orders') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Pass products data to JavaScript
+    window.productsData = {{ products | tojson }};
+    
+    // Add first item on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        addOrderItem();
+    });
+</script>
+{% endblock %}

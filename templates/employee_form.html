@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if employee else 'Add' }} Employee - ERP-Vision{% endblock %}
+{% block page_title %}{{ 'Edit' if employee else 'Add New' }} Employee{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 700px;">
+    <div class="card-header">
+        <h3 class="card-title">Employee Information</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('edit_employee', id=employee.id) if employee else url_for('add_employee') }}" method="POST" data-validate>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" name="name" class="form-control" value="{{ employee.name if employee else '' }}" required placeholder="Enter full name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" name="email" class="form-control" value="{{ employee.email if employee else '' }}" required placeholder="Enter email address">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select name="department" class="form-control">
+                        <option value="">Select Department</option>
+                        <option value="Sales" {% if employee and employee.department == 'Sales' %}selected{% endif %}>Sales</option>
+                        <option value="Engineering" {% if employee and employee.department == 'Engineering' %}selected{% endif %}>Engineering</option>
+                        <option value="HR" {% if employee and employee.department == 'HR' %}selected{% endif %}>HR</option>
+                        <option value="Finance" {% if employee and employee.department == 'Finance' %}selected{% endif %}>Finance</option>
+                        <option value="Marketing" {% if employee and employee.department == 'Marketing' %}selected{% endif %}>Marketing</option>
+                        <option value="Operations" {% if employee and employee.department == 'Operations' %}selected{% endif %}>Operations</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Position</label>
+                    <input type="text" name="position" class="form-control" value="{{ employee.position if employee else '' }}" placeholder="e.g., Manager, Senior Developer">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Salary</label>
+                    <input type="number" step="0.01" name="salary" class="form-control" value="{{ employee.salary if employee else '' }}" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Hire Date</label>
+                    <input type="date" name="hire_date" class="form-control" value="{{ employee.hire_date.strftime('%Y-%m-%d') if employee and employee.hire_date else '' }}">
+                </div>
+            </div>
+            
+            {% if employee %}
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-control">
+                    <option value="active" {% if employee.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if employee.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="on_leave" {% if employee.status == 'on_leave' %}selected{% endif %}>On Leave</option>
+                </select>
+            </div>
+            {% endif %}
+            
+            <div class="btn-group" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    {{ 'Update' if employee else 'Save' }} Employee
+                </button>
+                <a href="{{ url_for('employees') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Report - ERP-Vision{% endblock %}
+{% block page_title %}Sales Report{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <a href="{{ url_for('reports') }}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left"></i>
+        Back to Reports
+    </a>
+</div>
+
+<!-- Filter Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Filter by Date</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('sales_report') }}" method="GET" class="d-flex align-center gap-2" style="flex-wrap: wrap;">
+            <div class="form-group" style="margin: 0;">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date or '' }}">
+            </div>
+            <div class="form-group" style="margin: 0;">
+                <label class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date or '' }}">
+            </div>
+            <div class="form-group" style="margin: 0; align-self: flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i>
+                    Apply Filter
+                </button>
+            </div>
+            <div class="form-group" style="margin: 0; align-self: flex-end;">
+                <a href="{{ url_for('sales_report') }}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="stats-grid mb-4">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon blue">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+        </div>
+        <div class="stat-value">{{ orders|length }}</div>
+        <div class="stat-label">Total Orders</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon green">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+        </div>
+        <div class="stat-value">${{ "%.2f"|format(total_sales) }}</div>
+        <div class="stat-label">Total Sales</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon purple">
+                <i class="fas fa-calculator"></i>
+            </div>
+        </div>
+        <div class="stat-value">${{ "%.2f"|format(total_sales / orders|length if orders else 0) }}</div>
+        <div class="stat-label">Average Order Value</div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Orders</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if orders %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td class="font-mono">{{ order.order_number }}</td>
+                    <td>{{ order.customer.name }}</td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                    <td><span class="badge badge-{{ order.status }}">{{ order.status }}</span></td>
+                    <td><strong>${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right; font-weight: 600;">Total:</td>
+                    <td style="font-size: 1.1rem; font-weight: 700;">${{ "%.2f"|format(total_sales) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h3>No orders found</h3>
+            <p>No orders match the selected criteria.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

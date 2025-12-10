@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if product else 'Add' }} Product - ERP-Vision{% endblock %}
+{% block page_title %}{{ 'Edit' if product else 'Add New' }} Product{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 700px;">
+    <div class="card-header">
+        <h3 class="card-title">Product Information</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('edit_product', id=product.id) if product else url_for('add_product') }}" method="POST" data-validate>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Product Name *</label>
+                    <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required placeholder="Enter product name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">SKU *</label>
+                    <input type="text" name="sku" class="form-control font-mono" value="{{ product.sku if product else '' }}" required placeholder="e.g., PRD-001">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-control">
+                    <option value="">Select Category</option>
+                    <option value="Electronics" {% if product and product.category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                    <option value="Accessories" {% if product and product.category == 'Accessories' %}selected{% endif %}>Accessories</option>
+                    <option value="Office" {% if product and product.category == 'Office' %}selected{% endif %}>Office</option>
+                    <option value="Furniture" {% if product and product.category == 'Furniture' %}selected{% endif %}>Furniture</option>
+                    <option value="Other" {% if product and product.category == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Selling Price *</label>
+                    <input type="number" step="0.01" name="price" class="form-control" value="{{ product.price if product else '' }}" required placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Cost Price</label>
+                    <input type="number" step="0.01" name="cost" class="form-control" value="{{ product.cost if product else '0' }}" placeholder="0.00">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Stock Quantity</label>
+                    <input type="number" name="stock_quantity" class="form-control" value="{{ product.stock_quantity if product else '0' }}" placeholder="0">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Minimum Stock Level</label>
+                    <input type="number" name="min_stock_level" class="form-control" value="{{ product.min_stock_level if product else '10' }}" placeholder="10">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Enter product description">{{ product.description if product else '' }}</textarea>
+            </div>
+            
+            <div class="btn-group" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    {{ 'Update' if product else 'Save' }} Product
+                </button>
+                <a href="{{ url_for('products') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

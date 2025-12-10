@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Report - ERP-Vision{% endblock %}
+{% block page_title %}Financial Report{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <a href="{{ url_for('reports') }}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left"></i>
+        Back to Reports
+    </a>
+</div>
+
+<!-- Summary -->
+<div class="stats-grid mb-4">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon green">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+        </div>
+        <div class="stat-value text-success">${{ "%.2f"|format(total_income) }}</div>
+        <div class="stat-label">Total Income</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon red">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+        </div>
+        <div class="stat-value text-danger">${{ "%.2f"|format(total_expense) }}</div>
+        <div class="stat-label">Total Expenses</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon {% if total_income - total_expense >= 0 %}green{% else %}red{% endif %}">
+                <i class="fas fa-balance-scale"></i>
+            </div>
+        </div>
+        <div class="stat-value {% if total_income - total_expense >= 0 %}text-success{% else %}text-danger{% endif %}">
+            ${{ "%.2f"|format(total_income - total_expense) }}
+        </div>
+        <div class="stat-label">Net {% if total_income - total_expense >= 0 %}Profit{% else %}Loss{% endif %}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon purple">
+                <i class="fas fa-percentage"></i>
+            </div>
+        </div>
+        <div class="stat-value">{{ "%.1f"|format((total_income - total_expense) / total_income * 100 if total_income > 0 else 0) }}%</div>
+        <div class="stat-label">Profit Margin</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <!-- Income by Category -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Income by Category</h3>
+        </div>
+        <div class="card-body">
+            {% if income_by_category %}
+            <ul class="activity-list">
+                {% for category, amount in income_by_category.items() %}
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent);">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ category or 'Uncategorized' }}</div>
+                        <div class="activity-meta">
+                            {{ "%.1f"|format(amount / total_income * 100 if total_income > 0 else 0) }}% of income
+                        </div>
+                    </div>
+                    <strong class="text-success">${{ "%.2f"|format(amount) }}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-chart-pie"></i>
+                <p>No income recorded</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Expenses by Category -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Expenses by Category</h3>
+        </div>
+        <div class="card-body">
+            {% if expense_by_category %}
+            <ul class="activity-list">
+                {% for category, amount in expense_by_category.items() %}
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ category or 'Uncategorized' }}</div>
+                        <div class="activity-meta">
+                            {{ "%.1f"|format(amount / total_expense * 100 if total_expense > 0 else 0) }}% of expenses
+                        </div>
+                    </div>
+                    <strong class="text-danger">${{ "%.2f"|format(amount) }}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-chart-pie"></i>
+                <p>No expenses recorded</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Profit/Loss Summary -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Profit & Loss Summary</h3>
+    </div>
+    <div class="card-body">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Total Income</strong></td>
+                    <td style="text-align: right;" class="text-success"><strong>${{ "%.2f"|format(total_income) }}</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Total Expenses</strong></td>
+                    <td style="text-align: right;" class="text-danger"><strong>(${{ "%.2f"|format(total_expense) }})</strong></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr style="background: var(--bg-tertiary);">
+                    <td><strong>Net {% if total_income - total_expense >= 0 %}Profit{% else %}Loss{% endif %}</strong></td>
+                    <td style="text-align: right; font-size: 1.25rem;" class="{% if total_income - total_expense >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        <strong>${{ "%.2f"|format(total_income - total_expense) }}</strong>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}

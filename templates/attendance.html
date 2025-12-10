@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance - ERP-Vision{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2 class="section-title">Today's Attendance - {{ today.strftime('%B %d, %Y') }}</h2>
+</div>
+
+<div class="charts-grid">
+    <!-- Mark Attendance -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Mark Attendance</h3>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('mark_attendance') }}" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Employee</label>
+                    <select name="employee_id" class="form-control" required>
+                        <option value="">Select Employee</option>
+                        {% for employee in employees %}
+                        <option value="{{ employee.id }}">{{ employee.name }} ({{ employee.employee_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" name="date" class="form-control" value="{{ today.strftime('%Y-%m-%d') }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control">
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                        <option value="half_day">Half Day</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Check In</label>
+                        <input type="time" name="check_in" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Check Out</label>
+                        <input type="time" name="check_out" class="form-control">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-check"></i>
+                    Mark Attendance
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Today's Records -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Today's Records</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if attendances %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Status</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for att in attendances %}
+                    <tr>
+                        <td>{{ att.employee.name }}</td>
+                        <td>
+                            <span class="badge badge-{% if att.status == 'present' %}active{% elif att.status == 'absent' %}cancelled{% elif att.status == 'late' %}pending{% else %}shipped{% endif %}">
+                                {{ att.status }}
+                            </span>
+                        </td>
+                        <td>{{ att.check_in.strftime('%H:%M') if att.check_in else '-' }}</td>
+                        <td>{{ att.check_out.strftime('%H:%M') if att.check_out else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-check"></i>
+                <h3>No records yet</h3>
+                <p>Mark attendance for today.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Summary -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Attendance Summary</h3>
+    </div>
+    <div class="card-body">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="stat-value">{{ attendances|selectattr('status', 'equalto', 'present')|list|length }}</div>
+                <div class="stat-label">Present</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <i class="fas fa-times"></i>
+                </div>
+                <div class="stat-value">{{ attendances|selectattr('status', 'equalto', 'absent')|list|length }}</div>
+                <div class="stat-label">Absent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">{{ attendances|selectattr('status', 'equalto', 'late')|list|length }}</div>
+                <div class="stat-label">Late</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <i class="fas fa-user-minus"></i>
+                </div>
+                <div class="stat-value">{{ employees|length - attendances|length }}</div>
+                <div class="stat-label">Not Marked</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Visio{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="charts-grid">
+    <div class="card gradient-card blue">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-user" style="color: #0066FF; margin-right: 0.5rem;"></i>Profile Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #0066FF, #6366F1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700;">
+                    {{ current_user.get_initials() }}
+                </div>
+                <div>
+                    <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem;">{{ current_user.full_name }}</h2>
+                    <p class="text-secondary">{{ current_user.email }}</p>
+                    <span class="badge badge-{% if current_user.role == 'admin' %}confirmed{% elif current_user.role == 'manager' %}shipped{% else %}active{% endif %}" style="margin-top: 0.5rem;">
+                        {{ current_user.role|capitalize }}
+                    </span>
+                </div>
+            </div>
+            
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                    <small class="text-muted">Email cannot be changed</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">New Password (leave blank to keep current)</label>
+                    <input type="password" name="new_password" class="form-control" placeholder="Enter new password" minlength="6">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Update Profile
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card gradient-card purple">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-info-circle" style="color: #6366F1; margin-right: 0.5rem;"></i>Account Details</h3>
+        </div>
+        <div class="card-body">
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(0, 102, 255, 0.15); color: #0066FF;">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Member Since</div>
+                        <div class="activity-meta">{{ current_user.created_at.strftime('%B %d, %Y') }}</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Last Login</div>
+                        <div class="activity-meta">{{ current_user.last_login.strftime('%B %d, %Y at %H:%M') if current_user.last_login else 'N/A' }}</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366F1;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Role</div>
+                        <div class="activity-meta">{{ current_user.role|capitalize }}</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Account Status</div>
+                        <div class="activity-meta">{{ 'Active' if current_user.is_active else 'Inactive' }}</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

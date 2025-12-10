@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Visio{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cube"></i>
+                    <span>Visio</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Sales</span>
+                    <a href="{{ url_for('customers') }}" class="nav-item {% if 'customer' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-users"></i><span>Customers</span>
+                    </a>
+                    <a href="{{ url_for('orders') }}" class="nav-item {% if 'order' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-shopping-cart"></i><span>Orders</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Inventory</span>
+                    <a href="{{ url_for('products') }}" class="nav-item {% if 'product' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-box"></i><span>Products</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">HR</span>
+                    <a href="{{ url_for('employees') }}" class="nav-item {% if 'employee' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-id-badge"></i><span>Employees</span>
+                    </a>
+                    <a href="{{ url_for('attendance') }}" class="nav-item {% if 'attendance' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-calendar-check"></i><span>Attendance</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Accounting</span>
+                    <a href="{{ url_for('transactions') }}" class="nav-item {% if 'transaction' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-exchange-alt"></i><span>Transactions</span>
+                    </a>
+                    <a href="{{ url_for('reports') }}" class="nav-item {% if 'report' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-file-alt"></i><span>Reports</span>
+                    </a>
+                </div>
+                {% if current_user.role == 'admin' %}
+                <div class="nav-section">
+                    <span class="nav-section-title">Admin</span>
+                    <a href="{{ url_for('users') }}" class="nav-item {% if request.endpoint == 'users' %}active{% endif %}">
+                        <i class="fas fa-user-cog"></i><span>User Management</span>
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info" style="cursor: pointer;" onclick="toggleUserMenu()">
+                    <div class="user-avatar" style="background: linear-gradient(135deg, #0066FF, #6366F1); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem;">
+                        {{ current_user.get_initials() }}
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">{{ current_user.full_name }}</span>
+                        <span class="user-role">{{ current_user.role|capitalize }}</span>
+                    </div>
+                </div>
+                <div class="user-menu" id="userMenu" style="display: none; padding-top: 0.75rem; margin-top: 0.75rem;">
+                    <a href="{{ url_for('profile') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; color: var(--text-secondary); text-decoration: none;">
+                        <i class="fas fa-user"></i><span>My Profile</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; color: #EF4444; text-decoration: none;">
+                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="header-right">
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Search..."></div>
+                    <a href="{{ url_for('profile') }}" class="notification-btn" title="Profile"><i class="fas fa-user"></i></a>
+                    <a href="{{ url_for('logout') }}" class="notification-btn" title="Logout" style="color: #EF4444;"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </header>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                                <span>{{ message }}</span>
+                                <button class="flash-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <div class="content-body">{% block content %}{% endblock %}</div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>function toggleUserMenu() { const m = document.getElementById('userMenu'); m.style.display = m.style.display === 'none' ? 'block' : 'none'; }</script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

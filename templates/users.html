@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Visio{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2 class="section-title">All Users</h2>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Registered Users ({{ users|length }})</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #0066FF, #6366F1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600;">
+                                {{ user.get_initials() }}
+                            </div>
+                            <strong>{{ user.full_name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form action="{{ url_for('change_role', id=user.id) }}" method="POST" style="display: inline;">
+                            <select name="role" class="form-control" style="width: auto; padding: 0.35rem 0.5rem; font-size: 0.8rem;" onchange="this.form.submit()" {% if user.id == current_user.id %}disabled{% endif %}>
+                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                                <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <span class="badge badge-{% if user.is_active %}active{% else %}cancelled{% endif %}">
+                            {{ 'Active' if user.is_active else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                    <td>{{ user.last_login.strftime('%b %d, %Y') if user.last_login else 'Never' }}</td>
+                    <td>
+                        {% if user.id != current_user.id %}
+                        <form action="{{ url_for('toggle_user', id=user.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-sm {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}" title="{{ 'Deactivate' if user.is_active else 'Activate' }}">
+                                <i class="fas {% if user.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted">Current user</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
