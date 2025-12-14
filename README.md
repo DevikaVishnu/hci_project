@@ -2,16 +2,6 @@
 
 An Enterprise Resource Planning (ERP) for small-and-medium-sized businesses to enable better managerial decisions.
 
-## Features
-
-### 🔐 User Authentication
-- **Login/Logout** - Secure session-based authentication
-- **Registration** - Self-service account creation
-- **Password Hashing** - Werkzeug security
-- **Remember Me** - Persistent sessions
-- **Role-Based Access** - Admin, Manager, User roles
-- **User Management** - Admin can manage all users
-
 ### Dashboard
 - Sales Overview, Order Status, Revenue by Category
 - Income vs Expenses, Monthly Revenue, Expense Breakdown
