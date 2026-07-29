@@ -1,4 +1,4 @@
-# Visio ERP Dashboard
+# ERP Dashboard
 
 An Enterprise Resource Planning (ERP) for small-and-medium-sized businesses to enable better managerial decisions.
 
